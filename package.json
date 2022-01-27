@@ -10,19 +10,19 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/fionataeyang/datdot-ui-title.git"
+    "url": "git+https://github.com/datdotorg/datdot-ui-title.git"
   },
   "keywords": [
     "title",
     "component",
     "widget"
   ],
-  "author": "fionataeyang",
+  "author": "datdotorg",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/fionataeyang/datdot-ui-title/issues"
+    "url": "https://github.com/datdotorg/datdot-ui-title/issues"
   },
-  "homepage": "https://github.com/fionataeyang/datdot-ui-title#readme",
+  "homepage": "https://github.com/datdotorg/datdot-ui-title#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
     "budo": "^11.6.4"
