@@ -29,6 +29,8 @@
   },
   "dependencies": {
     "bel": "^6.0.0",
-    "csjs-inject": "^1.0.1"
+    "csjs-inject": "^1.0.1",
+    "message-maker": "github:datdotorg/message-maker",
+    "datdot-ui-logs": "git+https://github.com/datdotorg/datdot-ui-logs.git"
   }
 }
