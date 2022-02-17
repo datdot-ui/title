@@ -9,14 +9,15 @@ module.exports = title
 function title(opts, parent_protocol) {
     console.log({opts, parent_protocol})
 // ---------------------------------------------------------------
-    const myaddress = `${__filename}-${id++}` // __filename // import.meta.url
+    const myaddress = `${__filename}-${id++}`
     const inbox = {}
     const outbox = {}
     const recipients = {}
+    const names = {}
     const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
     const {notify, address} = parent_protocol(myaddress, listen)
-    recipients['parent'] = { notify, address, make: message_maker(myaddress) }
+    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
 
     notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
 

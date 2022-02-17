@@ -940,6 +940,7 @@ function scopify(css, ignores) {
 }
 
 },{"./regex":20,"./replace-animations":21,"./scoped-name":22}],24:[function(require,module,exports){
+(function (__filename){(function (){
 const bel = require('bel')
 const style_sheet = require('support-style-sheet')
 const message_maker = require('message-maker')
@@ -950,23 +951,22 @@ module.exports = i_log
 
 function i_log (parent_protocol) {
     // ---------------------------------------------------------------
-    const myaddress = `logs-${id++}`
+    const myaddress = `${__filename}-${id++}`
     const inbox = {}
     const outbox = {}
     const recipients = {}
-    const message_id = to => ( outbox[to] = 1 + (outbox[to]||0) )
+    const names = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
     const {notify, address} = parent_protocol(myaddress, listen)
-    const make = message_maker(myaddress)
-    let message = make({ to: address, type: 'ready', refs: ['old_logs', 'new_logs'] })
-    notify(message)
+    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
+
+    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
 
     function listen (msg) {
-        console.log(`Message for ${myaddress}`, {msg})
-        // const {page = 'Demo', from, flow, type, body, fn, file, line} = msg
         try {
             const { head, refs, type, data, meta } = msg // listen to msg
-            // inbox[head.join('/')] = msg                  // store msg
+            inbox[head.join('/')] = msg                  // store msg
             const from = bel`<span aria-label=${head[0]} class="from">${head[0]}</span>`
             const to = bel`<span aria-label="to" class="to">${head[1]}</span>`
             const data_info = bel`<span aria-label="data" class="data">data: ${typeof data === 'object' ? JSON.stringify(data) : data}</span>`
@@ -1160,6 +1160,7 @@ log-list .list:last-child .function {
     color: white;
 }
 `
+}).call(this)}).call(this,"/node_modules/datdot-ui-logs/src/index.js")
 },{"bel":4,"message-maker":26,"support-style-sheet":25}],25:[function(require,module,exports){
 module.exports = support_style_sheet
 function support_style_sheet (root, style) {
@@ -1539,14 +1540,15 @@ module.exports = title
 function title(opts, parent_protocol) {
     console.log({opts, parent_protocol})
 // ---------------------------------------------------------------
-    const myaddress = `${__filename}-${id++}` // __filename // import.meta.url
+    const myaddress = `${__filename}-${id++}`
     const inbox = {}
     const outbox = {}
     const recipients = {}
+    const names = {}
     const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
     const {notify, address} = parent_protocol(myaddress, listen)
-    recipients['parent'] = { notify, address, make: message_maker(myaddress) }
+    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
 
     notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
 
