@@ -1,19 +1,50 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
+(function (__filename){(function (){
 const bel = require('bel')
 const csjs = require('csjs-inject')
 const title = require('..')
 const main_title = require('./title.json')
+const message_maker = require('message-maker')
+const logs = require('datdot-ui-logs')
 
-function demoComponent() {
-    const defaultTitle = {
+var id = 0
+
+function demo() {
+// ---------------------------------------------------------------
+const myaddress = `${__filename}-${id++}`
+    const inbox = {}
+    const outbox = {}
+    const recipients = {}
+    const names = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
+
+    function make_protocol (name) {
+        return function protocol (address, notify) {
+            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
+            return { notify: listen, address: myaddress }
+        }
+    }
+    function listen (msg) {
+        console.log('New message', { msg })
+        const { head, refs, type, data, meta } = msg // receive msg
+        inbox[head.join('/')] = msg                  // store msg
+        const [from] = head
+        recipients['logs'].notify(msg)
+        // send back ack
+        const { notify, make, address } = names[from]
+        notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))
+    }
+// ---------------------------------------------------------------
+    const log_list = logs(make_protocol('logs'))
+    const defaultTitle = title({
         page: 'demo',
         name: 'title',
         content: 'Demo title',
         theme: {
             ...main_title,
         }
-    }
-    const title1 = {
+    }, make_protocol('title-demo'))
+    const title1 = title({
         page: 'demo',
         name: 'title',
         content: 'Create new account',
@@ -21,9 +52,9 @@ function demoComponent() {
             ...main_title,
             color: 'var(--color-violet-color-wheel)'
         }
-    }
+    }, make_protocol('title-1'))
 
-    const title2= {
+    const title2= title({
         page: 'demo',
         name: 'title',
         content: 'Import account',
@@ -32,29 +63,18 @@ function demoComponent() {
             color: 'var(--color-sring-green)',
             padding: '20px 0'
         }
-    }
-    const content = bel`
-    <div class=${css.content}>
-        ${title(defaultTitle)}
-        ${title(title1)}
-        ${title(title2)}
-    </div>`
+    }, make_protocol('title-2'))
 
-    // container
-    const container = wrap(content)
-    return container
-
-    function wrap (content, terminal) {
-        const container = bel`
+    const el = bel`
         <div class=${css.wrap}>
             <section class=${css.container}>
-                ${content}
+                <div class=${css.content}> ${defaultTitle} ${title1} ${title2} </div>
             </section>
-            ${terminal}
-        </div>
-        `
-        return container
-    }
+            ${log_list}
+        </div>`
+    
+    console.log({el})
+    return el
 
 }
 
@@ -65,12 +85,70 @@ const css = csjs`
     --font-light: 100;
     --font-normal: 300;
     --font-bold: 600;
+    --color-dark: 223, 13%, 20%;
     --color-black: hsl(0, 0%, 0%);
     --color-white: hsl(0, 0%, 100%);
     --color-orange: hsl(38, 100%, 50%);
     --color-blue: hsl(246, 100%, 50%);
     --color-sring-green: hsl(246, 100%, 50%);
     --color-violet-color-wheel: hsl(268, 100%, 50%);
+    --color-white: var(--b), 100%;
+    --color-black: var(--b), 0%;
+    --color-dark: 223, 13%, 20%;
+    --color-deep-black: 222, 18%, 11%;
+    --color-blue: 214, var(--r);
+    --color-red: 358, 99%, 53%;
+    --color-amaranth-pink: 331, 86%, 78%;
+    --color-persian-rose: 323, 100%, 56%;
+    --color-orange: 35, 100%, 58%;
+    --color-deep-saffron: 31, 100%, 56%;
+    --color-ultra-red: 348, 96%, 71%;
+    --color-flame: 15, 80%, 50%;
+    --color-verdigris: 180, 54%, 43%;
+    --color-maya-blue: 205, 96%, 72%;
+    --color-slate-blue: 248, 56%, 59%;
+    --color-blue-jeans: 204, 96%, 61%;
+    --color-dodger-blue: 213, 90%, 59%;
+    --color-light-green: 127, 86%, 77%;
+    --color-lime-green: 127, 100%, 40%;
+    --color-slimy-green: 108, 100%, 28%;
+    --color-maximum-blue-green: 180, 54%, 51%;
+    --color-green: 136, 81%, 34%;
+    --color-light-green: 97, 86%, 77%;
+    --color-lincoln-green: 97, 100%, 18%;
+    --color-yellow: 44, 100%, 55%;
+    --color-chrome-yellow: 39, var(--r);
+    --color-bright-yellow-crayola: 35, 100%, 58%;
+    --color-green-yellow-crayola: 51, 100%, 83%;
+    --color-purple: 283, var(--r);
+    --color-medium-purple: 269, 100%, 70%;
+    --color-grey33: var(--b), 20%;
+    --color-grey66: var(--b), 40%;
+    --color-grey70: var(--b), 44%;
+    --color-grey88: var(--b), 53%;
+    --color-greyA2: var(--b), 64%;
+    --color-greyC3: var(--b), 76%;
+    --color-greyCB: var(--b), 80%;
+    --color-greyD8: var(--b), 85%;
+    --color-greyD9: var(--b), 85%;
+    --color-greyE2: var(--b), 89%;
+    --color-greyEB: var(--b), 92%;
+    --color-greyED: var(--b), 93%;
+    --color-greyEF: var(--b), 94%;
+    --color-greyF2: var(--b), 95%;
+    --size12: 1.2rem;
+    --size14: 1.4rem;
+    --size16: 1.6rem;
+    --size18: 1.8rem;
+    --size20: 2rem;
+    --size22: 2.2rem;
+    --size24: 2.4rem;
+    --size26: 2.6rem;
+    --size28: 2.8rem;
+    --size30: 3rem;
+    --size32: 3.2rem;
+    --size36: 3.6rem;
+    --size40: 4rem;
 }
 html {
     box-sizing: border-box;
@@ -98,11 +176,34 @@ body {
     overflow-y: auto;
 }
 .content {}
-.content 
+[data-state="view"] i-log {
+    display: none;
+}
+[data-state="debug"] i-log {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 40%;
+    height: 100%;
+}
+@media (max-width: 768px) {
+    [data-state="debug"] {
+        grid-template-rows: 65% 35%;
+        grid-template-columns: auto;
+    }
+    [data-state="debug"] i-log {
+        position: inherit;
+        width: 100%;
+    }
+    .container {
+        grid-template-rows: 80px auto;
+    }
+}
 `
 
-document.body.append( demoComponent() )
-},{"..":27,"./title.json":2,"bel":4,"csjs-inject":7}],2:[function(require,module,exports){
+document.body.append(demo())
+}).call(this)}).call(this,"/demo/demo.js")
+},{"..":30,"./title.json":2,"bel":4,"csjs-inject":7,"datdot-ui-logs":24,"message-maker":26}],2:[function(require,module,exports){
 module.exports={
     "fontSize": "2.2rem",
     "fontWeight": "var(--font-bold)",
@@ -342,7 +443,7 @@ module.exports = hyperx(belCreateElement, {comments: true})
 module.exports.default = module.exports
 module.exports.createElement = belCreateElement
 
-},{"./appendChild":3,"hyperx":25}],5:[function(require,module,exports){
+},{"./appendChild":3,"hyperx":28}],5:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -361,7 +462,7 @@ function csjsInserter() {
 module.exports = csjsInserter;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"csjs":10,"insert-css":26}],6:[function(require,module,exports){
+},{"csjs":10,"insert-css":29}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = require('csjs/get-css');
@@ -839,6 +940,251 @@ function scopify(css, ignores) {
 }
 
 },{"./regex":20,"./replace-animations":21,"./scoped-name":22}],24:[function(require,module,exports){
+const bel = require('bel')
+const style_sheet = require('support-style-sheet')
+const message_maker = require('message-maker')
+
+var id = 0
+
+module.exports = i_log
+
+function i_log (parent_protocol) {
+    // ---------------------------------------------------------------
+    const myaddress = `logs-${id++}`
+    const inbox = {}
+    const outbox = {}
+    const recipients = {}
+    const message_id = to => ( outbox[to] = 1 + (outbox[to]||0) )
+
+    const {notify, address} = parent_protocol(myaddress, listen)
+    const make = message_maker(myaddress)
+    let message = make({ to: address, type: 'ready', refs: ['old_logs', 'new_logs'] })
+    notify(message)
+
+    function listen (msg) {
+        console.log(`Message for ${myaddress}`, {msg})
+        // const {page = 'Demo', from, flow, type, body, fn, file, line} = msg
+        try {
+            const { head, refs, type, data, meta } = msg // listen to msg
+            // inbox[head.join('/')] = msg                  // store msg
+            const from = bel`<span aria-label=${head[0]} class="from">${head[0]}</span>`
+            const to = bel`<span aria-label="to" class="to">${head[1]}</span>`
+            const data_info = bel`<span aria-label="data" class="data">data: ${typeof data === 'object' ? JSON.stringify(data) : data}</span>`
+            const type_info = bel`<span aria-type="${type}" aria-label="${type}"  class="type">${type}</span>`
+            const refs_info = bel`<div class="refs">refs: </div>`
+            Object.keys(refs).map( (key, i) => refs_info.append(bel`<span aria-label="${refs[key]}">${refs[key]}${i <  Object.keys(refs).length - 1 ? ', ' : ''}</span>`))
+            const log = bel`<div class="log">
+                <div class="head">
+                    ${from}
+                    ${type_info}
+                    ${to}
+                </div>
+                ${data_info}
+                ${refs_info}
+            </div>`
+            
+            var list = bel`<aside class="list">
+                ${log}
+                <div class="file">
+                    <span>${meta.stack[0]}</span>
+                    <span>${meta.stack[1]}</span>
+                </div>
+            </aside>
+            `
+            log_list.append(list)
+            log_list.scrollTop = log_list.scrollHeight
+        } catch (error) {
+            console.log({error})
+            document.addEventListener('DOMContentLoaded', () => log_list.append(list))
+            return false
+        }
+    }
+// ---------------------------------------------------------------
+    // notify({from: 'logs', flow: 'logs-layout', type: 'ready', fn: 'logs', line: 8})
+    const i_log = document.createElement('i-log')
+    const shadow = i_log.attachShadow({mode: 'closed'})
+    const title = bel`<h4>Logs</h4>`
+    const content = bel`<section class="content">${title}</section>`
+    const log_list = document.createElement('log-list')
+    style_sheet(shadow, style)
+    content.append(log_list)
+    shadow.append(content)
+    document.addEventListener('DOMContentLoaded', () => { log_list.scrollTop = log_list.scrollHeight })
+
+    return i_log
+}
+
+const style = `
+:host(i-log) {}
+.content {
+    --bgColor: var(--color-dark);
+    --opacity: 1;
+    width: 100%;
+    height: 100%;
+    font-size: var(--size12);
+    color: #fff;
+    background-color: hsla( var(--bgColor), var(--opacity));
+}
+h4 {
+    --bgColor: var(--color-deep-black);
+    --opacity: 1;
+    margin: 0;
+    padding: 10px 10px;
+    color: #fff;
+    background-color: hsl( var(--bgColor), var(--opacity) );
+}
+log-list {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 44px);
+    overflow-y: auto;
+    margin: 8px;
+}
+.list {
+    --bgColor: 0, 0%, 30%;
+    --opacity: 0.25;
+    padding: 2px 10px 4px 10px;
+    margin-bottom: 4px;
+    background-color: hsla( var(--bgColor), var(--opacity) );
+    border-radius: 8px;
+    transition: background-color 0.6s ease-in-out;
+}
+log-list .list:last-child {
+    --bgColor: var(--color-verdigris);
+    --opacity: 0.5;
+}
+.log {
+    line-height: 1.8;
+    word-break: break-all;
+    white-space: pre-wrap;
+}
+.log span {
+    --size: var(--size12);
+    font-size: var(--size);
+}
+.from {
+    --color: var(--color-maximum-blue-green);
+    color: hsl( var(--color) );
+    justify-content: center;
+    align-items: center;
+}
+.to {}
+.type {
+    --color: var(--color-greyD9);
+    --bgColor: var(--color-greyD9);
+    --opacity: .25;
+    color: hsl( var(--color) );
+    background-color: hsla( var(--bgColor), var(--opacity) );
+    padding: 2px 10px;
+    border-radius: 8px;
+    justify-self: center;
+    align-self: center;
+}
+log-list .list:last-child .type {}
+.file {
+    --color: var(--color-greyA2);
+    display: grid;
+    justify-content: right;
+    color: hsl( var(--color) );
+    line-height: 1.6;
+}
+log-list .list:last-child .file {
+    --color: var(--color-white);
+}
+[aria-type="click"] {
+    --color: var(--color-dark);
+    --bgColor: var(--color-yellow);
+    --opacity: 1;
+}
+[aria-type="triggered"] {
+    --color: var(--color-white);
+    --bgColor: var(--color-blue-jeans);
+    --opacity: .5;
+}
+[aria-type="opened"] {
+    --bgColor: var(--color-slate-blue);
+    --opacity: 1;
+}
+[aria-type="closed"] {
+    --bgColor: var(--color-ultra-red);
+    --opacity: 1;
+}
+[aria-type="error"] {
+    --color: var(--color-white);
+    --bgColor: var(--color-red);
+    --opacity: 1;
+}
+[aria-type="warning"] {
+    --color: var(--color-white);
+    --bgColor: var(--color-deep-saffron);
+    --opacity: 1;
+}
+[aria-type="checked"] {
+    --color: var(--color-dark);
+    --bgColor: var(--color-blue-jeans);
+    --opacity: 1;
+}
+[aria-type="unchecked"] {
+    --bgColor: var(--color-blue-jeans);
+    --opacity: .3;
+}
+[aria-type="selected"] {
+    --color: var(--color-dark);
+    --bgColor: var(--color-lime-green);
+    --opacity: 1;
+}
+[aria-type="unselected"] {
+    --bgColor: var(--color-lime-green);
+    --opacity: .25;
+}
+
+log-list .list:last-child [aria-type="ready"] {
+    --bgColor: var(--color-deep-black);
+    --opacity: 0.3;
+}
+.function {
+    --color: 0, 0%, 70%;
+    color: var(--color);
+}
+log-list .list:last-child .function {
+    --color: var(--color-white);
+}
+.head {
+    display: grid;
+    grid-template-columns: 1fr 80px 1fr;
+    gap: 12px;
+}
+.refs {
+    display: flex;
+    gap: 5px;
+    color: white;
+}
+`
+},{"bel":4,"message-maker":26,"support-style-sheet":25}],25:[function(require,module,exports){
+module.exports = support_style_sheet
+function support_style_sheet (root, style) {
+    return (() => {
+        try {
+            const sheet = new CSSStyleSheet()
+            sheet.replaceSync(style)
+            root.adoptedStyleSheets = [sheet]
+            return true 
+        } catch (error) { 
+            const inject_style = `<style>${style}</style>`
+            root.innerHTML = `${inject_style}`
+            return false
+        }
+    })()
+}
+},{}],26:[function(require,module,exports){
+module.exports = function message_maker (from) {
+  let msg_id = 0
+  return function make ({to, type, data = null, refs = {} }) {
+      const stack = (new Error().stack.split('\n').slice(2).filter(x => x.trim()))
+      return { head: [from, to, msg_id++], refs, type, data, meta: { stack }}
+  }
+}
+},{}],27:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -859,7 +1205,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],25:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -1156,7 +1502,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":24}],26:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":27}],29:[function(require,module,exports){
 var inserted = {};
 
 module.exports = function (css, options) {
@@ -1180,18 +1526,45 @@ module.exports = function (css, options) {
     }
 };
 
-},{}],27:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
+(function (__filename){(function (){
 const bel = require('bel')
 const csjs = require('csjs-inject')
+const message_maker = require('message-maker')
+
+var id = 0
 
 module.exports = title 
-function title(option) {
-    const {page, flow, name, content, theme} = option
+
+function title(opts, parent_protocol) {
+    console.log({opts, parent_protocol})
+// ---------------------------------------------------------------
+    const myaddress = `${__filename}-${id++}` // __filename // import.meta.url
+    const inbox = {}
+    const outbox = {}
+    const recipients = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
+
+    const {notify, address} = parent_protocol(myaddress, listen)
+    recipients['parent'] = { notify, address, make: message_maker(myaddress) }
+
+    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
+
+    function listen (msg) {
+        console.log('New message', { msg })
+    }
+// ---------------------------------------------------------------
+    const {content, theme} = opts
 
     function ui_element(css) {
         const widget = 'ui-title'
-        const element = bel`<h2 class=${css.title}>${content}</h2>`
+        const element = bel`<h2 class=${css.title} onclick=${e => handle_onclick(e)}>${content}</h2>`
         return element
+    }
+
+    function handle_onclick (e) {
+        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: e, ref: {} })
+        recipients['parent'].notify(message)
     }
     
     if (theme)
@@ -1215,4 +1588,5 @@ function title(option) {
 }
 
 
-},{"bel":4,"csjs-inject":7}]},{},[1]);
+}).call(this)}).call(this,"/src/index.js")
+},{"bel":4,"csjs-inject":7,"message-maker":26}]},{},[1]);

@@ -9,27 +9,32 @@ module.exports = title
 function title(opts, parent_protocol) {
     console.log({opts, parent_protocol})
 // ---------------------------------------------------------------
-    const myaddress = `title-${id++}`
+    const myaddress = `${__filename}-${id++}` // __filename // import.meta.url
     const inbox = {}
     const outbox = {}
     const recipients = {}
-    const message_id = to => ( outbox[to] = 1 + (outbox[to]||0) )
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
     const {notify, address} = parent_protocol(myaddress, listen)
-    const make = message_maker(myaddress)
-    let message = make({ to: address, type: 'ready', refs: ['old_logs', 'new_logs'] })
-    notify(message)
+    recipients['parent'] = { notify, address, make: message_maker(myaddress) }
+
+    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
 
     function listen (msg) {
-
+        console.log('New message', { msg })
     }
 // ---------------------------------------------------------------
-    const {page, flow, name, content, theme} = opts
+    const {content, theme} = opts
 
     function ui_element(css) {
         const widget = 'ui-title'
-        const element = bel`<h2 class=${css.title}>${content}</h2>`
+        const element = bel`<h2 class=${css.title} onclick=${e => handle_onclick(e)}>${content}</h2>`
         return element
+    }
+
+    function handle_onclick (e) {
+        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: e, ref: {} })
+        recipients['parent'].notify(message)
     }
     
     if (theme)

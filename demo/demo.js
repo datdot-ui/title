@@ -9,15 +9,16 @@ var id = 0
 
 function demo() {
 // ---------------------------------------------------------------
-    const myaddress = `demo-${id++}`
+const myaddress = `${__filename}-${id++}`
     const inbox = {}
     const outbox = {}
     const recipients = {}
-    const message_id = to => ( outbox[to] = 1 + (outbox[to]||0) )
+    const names = {}
+    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
 
     function make_protocol (name) {
         return function protocol (address, notify) {
-            recipients[name] = { address, notify, make: message_maker(myaddress) }
+            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
             return { notify: listen, address: myaddress }
         }
     }
@@ -27,6 +28,9 @@ function demo() {
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
         recipients['logs'].notify(msg)
+        // send back ack
+        const { notify, make, address } = names[from]
+        notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))
     }
 // ---------------------------------------------------------------
     const log_list = logs(make_protocol('logs'))
