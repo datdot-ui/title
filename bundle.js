@@ -965,6 +965,7 @@ function i_log (parent_protocol) {
 
     function listen (msg) {
         try {
+            console.log({MMMMessage: msg})
             const { head, refs, type, data, meta } = msg // listen to msg
             inbox[head.join('/')] = msg                  // store msg
             const from = bel`<span aria-label=${head[0]} class="from">${head[0]}</span>`
@@ -1565,7 +1566,7 @@ function title(opts, parent_protocol) {
     }
 
     function handle_onclick (e) {
-        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: e, ref: {} })
+        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: { event: e, target: 'title el' }, ref: {} })
         recipients['parent'].notify(message)
     }
     
