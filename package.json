@@ -1,6 +1,6 @@
 {
   "name": "datdot-ui-title",
-  "version": "0.0.0-alpha",
+  "version": "0.0.1-alpha",
   "description": "code snippet",
   "main": "src/index.js",
   "scripts": {
@@ -31,6 +31,6 @@
     "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
     "message-maker": "github:datdotorg/message-maker",
-    "datdot-ui-logs": "git+https://github.com/datdotorg/datdot-ui-logs.git"
+    "datdot-ui-logs": "git+https://github.com/datdot-ui/logs.git#v0.0.1-alpha"
   }
 }

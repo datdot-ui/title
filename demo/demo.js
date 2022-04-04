@@ -27,7 +27,8 @@ const myaddress = `${__filename}-${id++}`
         const { head, refs, type, data, meta } = msg // receive msg
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
-        recipients['logs'].notify(msg)
+        const { make: logs_make, address: logs_address, notify: logs_notify } = recipients['logs']
+        logs_notify(logs_make({ to: logs_address, type, data }))
         // send back ack
         const { notify, make, address } = names[from]
         notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))

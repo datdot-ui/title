@@ -29,7 +29,8 @@ const myaddress = `${__filename}-${id++}`
         const { head, refs, type, data, meta } = msg // receive msg
         inbox[head.join('/')] = msg                  // store msg
         const [from] = head
-        recipients['logs'].notify(msg)
+        const { make: logs_make, address: logs_address, notify: logs_notify } = recipients['logs']
+        logs_notify(logs_make({ to: logs_address, type, data }))
         // send back ack
         const { notify, make, address } = names[from]
         notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))
@@ -950,6 +951,11 @@ var id = 0
 module.exports = i_log
 
 function i_log (parent_protocol) {
+    const i_log = document.createElement('i-log')
+    const shadow = i_log.attachShadow({mode: 'closed'})
+    const title = bel`<h4>Logs</h4>`
+    const content = bel`<section class="content">${title}</section>`
+    const logList = document.createElement('log-list')
     // ---------------------------------------------------------------
     const myaddress = `${__filename}-${id++}`
     const inbox = {}
@@ -965,7 +971,6 @@ function i_log (parent_protocol) {
 
     function listen (msg) {
         try {
-            console.log({MMMMessage: msg})
             const { head, refs, type, data, meta } = msg // listen to msg
             inbox[head.join('/')] = msg                  // store msg
             const from = bel`<span aria-label=${head[0]} class="from">${head[0]}</span>`
@@ -992,25 +997,19 @@ function i_log (parent_protocol) {
                 </div>
             </aside>
             `
-            log_list.append(list)
-            log_list.scrollTop = log_list.scrollHeight
+            logList.append(list)
+            logList.scrollTop = logList.scrollHeight
         } catch (error) {
             console.log({error})
-            document.addEventListener('DOMContentLoaded', () => log_list.append(list))
+            document.addEventListener('DOMContentLoaded', () => logList.append(list))
             return false
         }
     }
 // ---------------------------------------------------------------
-    // notify({from: 'logs', flow: 'logs-layout', type: 'ready', fn: 'logs', line: 8})
-    const i_log = document.createElement('i-log')
-    const shadow = i_log.attachShadow({mode: 'closed'})
-    const title = bel`<h4>Logs</h4>`
-    const content = bel`<section class="content">${title}</section>`
-    const log_list = document.createElement('log-list')
     style_sheet(shadow, style)
-    content.append(log_list)
+    content.append(logList)
     shadow.append(content)
-    document.addEventListener('DOMContentLoaded', () => { log_list.scrollTop = log_list.scrollHeight })
+    document.addEventListener('DOMContentLoaded', () => { logList.scrollTop = logList.scrollHeight })
 
     return i_log
 }
@@ -1566,8 +1565,8 @@ function title(opts, parent_protocol) {
     }
 
     function handle_onclick (e) {
-        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: { event: e, target: 'title el' }, ref: {} })
-        recipients['parent'].notify(message)
+        const { make } = recipients['parent']
+        notify(make({ to: address, type: 'click', data: { event: e, target: 'title el' }}))
     }
     
     if (theme)
