@@ -34,8 +34,8 @@ function title(opts, parent_protocol) {
     }
 
     function handle_onclick (e) {
-        const message = recipients['parent'].make({ to: recipients['parent'].address, type: 'click', data: { event: e, target: 'title el' }, ref: {} })
-        recipients['parent'].notify(message)
+        const { make } = recipients['parent']
+        notify(make({ to: address, type: 'click', data: { event: e, target: 'title el' }}))
     }
     
     if (theme)

@@ -1,0 +1,169 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 debug pnpm:package-manifest": {
+    "initial": {
+      "name": "datdot-ui-title",
+      "version": "0.0.1-alpha",
+      "description": "code snippet",
+      "main": "src/index.js",
+      "scripts": {
+        "start": "budo demo/demo.js:bundle.js --open --live",
+        "build": "browserify demo/demo.js -o bundle.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "repository": {
+        "type": "git",
+        "url": "git+https://github.com/datdot-ui/title.git"
+      },
+      "keywords": [
+        "title",
+        "component",
+        "widget"
+      ],
+      "author": "datdotorg",
+      "license": "MIT",
+      "bugs": {
+        "url": "https://github.com/datdot-ui/title/issues"
+      },
+      "homepage": "https://github.com/datdot-ui/title#readme",
+      "devDependencies": {
+        "browserify": "^17.0.0",
+        "budo": "^11.6.4"
+      },
+      "dependencies": {
+        "bel": "^6.0.0",
+        "csjs-inject": "^1.0.1",
+        "message-maker": "github:datdotorg/message-maker",
+        "datdot-ui-logs": "git+https://github.com/datdot-ui-logs.git#v0.0.1-alpha"
+      }
+    },
+    "prefix": "/home/ninabreznik/Documents/code/play/datdot/ui/title"
+  },
+  "2 debug pnpm:context": {
+    "currentLockfileExists": false,
+    "storeDir": "/home/ninabreznik/.pnpm-store/v3",
+    "virtualStoreDir": "/home/ninabreznik/Documents/code/play/datdot/ui/title/node_modules/.pnpm"
+  },
+  "3 debug pnpm:stage": {
+    "prefix": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "stage": "resolution_started"
+  },
+  "4 debug pnpm:_dependency_resolved": {
+    "resolution": "registry.npmjs.org/csjs-inject/1.0.1",
+    "wanted": {
+      "dependentId": ".",
+      "name": "csjs-inject",
+      "rawSpec": "^1.0.1"
+    }
+  },
+  "5 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/csjs-inject/1.0.1",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "resolved"
+  },
+  "6 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/csjs-inject/1.0.1",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "found_in_store"
+  },
+  "7 debug pnpm:_dependency_resolved": {
+    "resolution": "registry.npmjs.org/bel/6.0.0",
+    "wanted": {
+      "dependentId": ".",
+      "name": "bel",
+      "rawSpec": "^6.0.0"
+    }
+  },
+  "8 debug pnpm:deprecation": {
+    "deprecated": "Renamed to 'nanohtml'. 'npm install nanohtml'",
+    "depth": 0,
+    "pkgId": "registry.npmjs.org/bel/6.0.0",
+    "pkgName": "bel",
+    "pkgVersion": "6.0.0",
+    "prefix": "/home/ninabreznik/Documents/code/play/datdot/ui/title"
+  },
+  "9 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/bel/6.0.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "resolved"
+  },
+  "10 debug pnpm:_dependency_resolved": {
+    "resolution": "registry.npmjs.org/budo/11.7.0",
+    "wanted": {
+      "dependentId": ".",
+      "name": "budo",
+      "rawSpec": "^11.6.4"
+    }
+  },
+  "11 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/budo/11.7.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "resolved"
+  },
+  "12 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/bel/6.0.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "found_in_store"
+  },
+  "13 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/budo/11.7.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "found_in_store"
+  },
+  "14 debug pnpm:_dependency_resolved": {
+    "resolution": "registry.npmjs.org/browserify/17.0.0",
+    "wanted": {
+      "dependentId": ".",
+      "name": "browserify",
+      "rawSpec": "^17.0.0"
+    }
+  },
+  "15 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/browserify/17.0.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "resolved"
+  },
+  "16 debug pnpm:progress": {
+    "packageId": "registry.npmjs.org/browserify/17.0.0",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "found_in_store"
+  },
+  "17 debug pnpm:_dependency_resolved": {
+    "resolution": "github.com/datdotorg/message-maker/d841e407a1520ed6f1a579a1892f13f5e3c13c92",
+    "wanted": {
+      "dependentId": ".",
+      "name": "message-maker",
+      "rawSpec": "github:datdotorg/message-maker"
+    }
+  },
+  "18 debug pnpm:progress": {
+    "packageId": "github.com/datdotorg/message-maker/d841e407a1520ed6f1a579a1892f13f5e3c13c92",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "found_in_store"
+  },
+  "19 debug pnpm:progress": {
+    "packageId": "github.com/datdotorg/message-maker/d841e407a1520ed6f1a579a1892f13f5e3c13c92",
+    "requester": "/home/ninabreznik/Documents/code/play/datdot/ui/title",
+    "status": "resolved"
+  },
+  "20 error pnpm": {
+    "shortMessage": "Command failed with exit code 128: /usr/bin/git ls-remote --refs https://github.com/datdot-ui-logs.git v0.0.1-alpha",
+    "command": "/usr/bin/git ls-remote --refs https://github.com/datdot-ui-logs.git v0.0.1-alpha",
+    "escapedCommand": "\"/usr/bin/git\" ls-remote --refs \"https://github.com/datdot-ui-logs.git\" v0.0.1-alpha",
+    "exitCode": 128,
+    "stdout": "",
+    "stderr": "remote: Not Found\nfatal: repository 'https://github.com/datdot-ui-logs.git/' not found",
+    "failed": true,
+    "timedOut": false,
+    "isCanceled": false,
+    "killed": false,
+    "pkgsStack": [],
+    "err": {
+      "name": "pnpm",
+      "message": "Command failed with exit code 128: /usr/bin/git ls-remote --refs https://github.com/datdot-ui-logs.git v0.0.1-alpha\nremote: Not Found\nfatal: repository 'https://github.com/datdot-ui-logs.git/' not found",
+      "stack": "pnpm: Command failed with exit code 128: /usr/bin/git ls-remote --refs https://github.com/datdot-ui-logs.git v0.0.1-alpha\nremote: Not Found\nfatal: repository 'https://github.com/datdot-ui-logs.git/' not found\n    at makeError (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:42472:17)\n    at handlePromise (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:43043:33)\n    at processTicksAndRejections (node:internal/process/task_queues:96:5)\n    at async getRepoRefs (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:84983:23)\n    at async resolveRef (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:84995:20)\n    at async resolveGit (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:84946:24)\n    at async Object.resolve (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:86071:241)\n    at async run (/home/ninabreznik/.npm-global/lib/node_modules/pnpm/dist/pnpm.cjs:74166:23)"
+    }
+  }
+}
