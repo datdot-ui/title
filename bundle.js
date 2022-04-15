@@ -1,77 +1,40 @@
 (function(){function r(e,n,t){function o(i,f){if(!n[i]){if(!e[i]){var c="function"==typeof require&&require;if(!f&&c)return c(i,!0);if(u)return u(i,!0);var a=new Error("Cannot find module '"+i+"'");throw a.code="MODULE_NOT_FOUND",a}var p=n[i]={exports:{}};e[i][0].call(p.exports,function(r){var n=e[i][1][r];return o(n||r)},p,p.exports,r,e,n,t)}return n[i].exports}for(var u="function"==typeof require&&require,i=0;i<t.length;i++)o(t[i]);return o}return r})()({1:[function(require,module,exports){
-(function (__filename){(function (){
 const bel = require('bel')
 const csjs = require('csjs-inject')
 const title = require('..')
-const main_title = require('./title.json')
-const message_maker = require('message-maker')
-const logs = require('datdot-ui-logs')
+const main_title = require('./main_title.json')
 
 var id = 0
 
 function demo() {
-// ---------------------------------------------------------------
-const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    function make_protocol (name) {
-        return function protocol (address, notify) {
-            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
-            return { notify: listen, address: myaddress }
-        }
-    }
-    function listen (msg) {
-        console.log('New message', { msg })
-        const { head, refs, type, data, meta } = msg // receive msg
-        inbox[head.join('/')] = msg                  // store msg
-        const [from] = head
-        const { make: logs_make, address: logs_address, notify: logs_notify } = recipients['logs']
-        logs_notify(logs_make({ to: logs_address, type, data }))
-        // send back ack
-        const { notify, make, address } = names[from]
-        notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))
-    }
-// ---------------------------------------------------------------
-    const log_list = logs(make_protocol('logs'))
-    const defaultTitle = title({
-        page: 'demo',
-        name: 'title',
+    const title_main = title({
         content: 'Demo title',
         theme: {
             ...main_title,
         }
-    }, make_protocol('title-demo'))
-    const title1 = title({
-        page: 'demo',
-        name: 'title',
+    })
+    const subtitle_1 = title({
         content: 'Create new account',
         theme: {
             ...main_title,
             color: 'var(--color-violet-color-wheel)'
         }
-    }, make_protocol('title-1'))
+    })
 
-    const title2= title({
-        page: 'demo',
-        name: 'title',
+    const subtitle_2= title({
         content: 'Import account',
         theme: {
             ...main_title,
             color: 'var(--color-sring-green)',
             padding: '20px 0'
         }
-    }, make_protocol('title-2'))
+    })
 
     const el = bel`
         <div class=${css.wrap}>
             <section class=${css.container}>
-                <div class=${css.content}> ${defaultTitle} ${title1} ${title2} </div>
+                <div class=${css.content}> ${title_main} ${subtitle_1} ${subtitle_2} </div>
             </section>
-            ${log_list}
         </div>`
     
     console.log({el})
@@ -203,8 +166,7 @@ body {
 `
 
 document.body.append(demo())
-}).call(this)}).call(this,"/demo/demo.js")
-},{"..":30,"./title.json":2,"bel":4,"csjs-inject":7,"datdot-ui-logs":24,"message-maker":26}],2:[function(require,module,exports){
+},{"..":27,"./main_title.json":2,"bel":4,"csjs-inject":7}],2:[function(require,module,exports){
 module.exports={
     "fontSize": "2.2rem",
     "fontWeight": "var(--font-bold)",
@@ -444,7 +406,7 @@ module.exports = hyperx(belCreateElement, {comments: true})
 module.exports.default = module.exports
 module.exports.createElement = belCreateElement
 
-},{"./appendChild":3,"hyperx":28}],5:[function(require,module,exports){
+},{"./appendChild":3,"hyperx":25}],5:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -463,7 +425,7 @@ function csjsInserter() {
 module.exports = csjsInserter;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"csjs":10,"insert-css":29}],6:[function(require,module,exports){
+},{"csjs":10,"insert-css":26}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = require('csjs/get-css');
@@ -941,251 +903,6 @@ function scopify(css, ignores) {
 }
 
 },{"./regex":20,"./replace-animations":21,"./scoped-name":22}],24:[function(require,module,exports){
-(function (__filename){(function (){
-const bel = require('bel')
-const style_sheet = require('support-style-sheet')
-const message_maker = require('message-maker')
-
-var id = 0
-
-module.exports = i_log
-
-function i_log (parent_protocol) {
-    const i_log = document.createElement('i-log')
-    const shadow = i_log.attachShadow({mode: 'closed'})
-    const title = bel`<h4>Logs</h4>`
-    const content = bel`<section class="content">${title}</section>`
-    const logList = document.createElement('log-list')
-    // ---------------------------------------------------------------
-    const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    const {notify, address} = parent_protocol(myaddress, listen)
-    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
-
-    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
-
-    function listen (msg) {
-        try {
-            const { head, refs, type, data, meta } = msg // listen to msg
-            inbox[head.join('/')] = msg                  // store msg
-            const from = bel`<span aria-label=${head[0]} class="from">${head[0]}</span>`
-            const to = bel`<span aria-label="to" class="to">${head[1]}</span>`
-            const data_info = bel`<span aria-label="data" class="data">data: ${typeof data === 'object' ? JSON.stringify(data) : data}</span>`
-            const type_info = bel`<span aria-type="${type}" aria-label="${type}"  class="type">${type}</span>`
-            const refs_info = bel`<div class="refs">refs: </div>`
-            Object.keys(refs).map( (key, i) => refs_info.append(bel`<span aria-label="${refs[key]}">${refs[key]}${i <  Object.keys(refs).length - 1 ? ', ' : ''}</span>`))
-            const log = bel`<div class="log">
-                <div class="head">
-                    ${from}
-                    ${type_info}
-                    ${to}
-                </div>
-                ${data_info}
-                ${refs_info}
-            </div>`
-            
-            var list = bel`<aside class="list">
-                ${log}
-                <div class="file">
-                    <span>${meta.stack[0]}</span>
-                    <span>${meta.stack[1]}</span>
-                </div>
-            </aside>
-            `
-            logList.append(list)
-            logList.scrollTop = logList.scrollHeight
-        } catch (error) {
-            console.log({error})
-            document.addEventListener('DOMContentLoaded', () => logList.append(list))
-            return false
-        }
-    }
-// ---------------------------------------------------------------
-    style_sheet(shadow, style)
-    content.append(logList)
-    shadow.append(content)
-    document.addEventListener('DOMContentLoaded', () => { logList.scrollTop = logList.scrollHeight })
-
-    return i_log
-}
-
-const style = `
-:host(i-log) {}
-.content {
-    --bgColor: var(--color-dark);
-    --opacity: 1;
-    width: 100%;
-    height: 100%;
-    font-size: var(--size12);
-    color: #fff;
-    background-color: hsla( var(--bgColor), var(--opacity));
-}
-h4 {
-    --bgColor: var(--color-deep-black);
-    --opacity: 1;
-    margin: 0;
-    padding: 10px 10px;
-    color: #fff;
-    background-color: hsl( var(--bgColor), var(--opacity) );
-}
-log-list {
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 44px);
-    overflow-y: auto;
-    margin: 8px;
-}
-.list {
-    --bgColor: 0, 0%, 30%;
-    --opacity: 0.25;
-    padding: 2px 10px 4px 10px;
-    margin-bottom: 4px;
-    background-color: hsla( var(--bgColor), var(--opacity) );
-    border-radius: 8px;
-    transition: background-color 0.6s ease-in-out;
-}
-log-list .list:last-child {
-    --bgColor: var(--color-verdigris);
-    --opacity: 0.5;
-}
-.log {
-    line-height: 1.8;
-    word-break: break-all;
-    white-space: pre-wrap;
-}
-.log span {
-    --size: var(--size12);
-    font-size: var(--size);
-}
-.from {
-    --color: var(--color-maximum-blue-green);
-    color: hsl( var(--color) );
-    justify-content: center;
-    align-items: center;
-}
-.to {}
-.type {
-    --color: var(--color-greyD9);
-    --bgColor: var(--color-greyD9);
-    --opacity: .25;
-    color: hsl( var(--color) );
-    background-color: hsla( var(--bgColor), var(--opacity) );
-    padding: 2px 10px;
-    border-radius: 8px;
-    justify-self: center;
-    align-self: center;
-}
-log-list .list:last-child .type {}
-.file {
-    --color: var(--color-greyA2);
-    display: grid;
-    justify-content: right;
-    color: hsl( var(--color) );
-    line-height: 1.6;
-}
-log-list .list:last-child .file {
-    --color: var(--color-white);
-}
-[aria-type="click"] {
-    --color: var(--color-dark);
-    --bgColor: var(--color-yellow);
-    --opacity: 1;
-}
-[aria-type="triggered"] {
-    --color: var(--color-white);
-    --bgColor: var(--color-blue-jeans);
-    --opacity: .5;
-}
-[aria-type="opened"] {
-    --bgColor: var(--color-slate-blue);
-    --opacity: 1;
-}
-[aria-type="closed"] {
-    --bgColor: var(--color-ultra-red);
-    --opacity: 1;
-}
-[aria-type="error"] {
-    --color: var(--color-white);
-    --bgColor: var(--color-red);
-    --opacity: 1;
-}
-[aria-type="warning"] {
-    --color: var(--color-white);
-    --bgColor: var(--color-deep-saffron);
-    --opacity: 1;
-}
-[aria-type="checked"] {
-    --color: var(--color-dark);
-    --bgColor: var(--color-blue-jeans);
-    --opacity: 1;
-}
-[aria-type="unchecked"] {
-    --bgColor: var(--color-blue-jeans);
-    --opacity: .3;
-}
-[aria-type="selected"] {
-    --color: var(--color-dark);
-    --bgColor: var(--color-lime-green);
-    --opacity: 1;
-}
-[aria-type="unselected"] {
-    --bgColor: var(--color-lime-green);
-    --opacity: .25;
-}
-
-log-list .list:last-child [aria-type="ready"] {
-    --bgColor: var(--color-deep-black);
-    --opacity: 0.3;
-}
-.function {
-    --color: 0, 0%, 70%;
-    color: var(--color);
-}
-log-list .list:last-child .function {
-    --color: var(--color-white);
-}
-.head {
-    display: grid;
-    grid-template-columns: 1fr 80px 1fr;
-    gap: 12px;
-}
-.refs {
-    display: flex;
-    gap: 5px;
-    color: white;
-}
-`
-}).call(this)}).call(this,"/node_modules/datdot-ui-logs/src/index.js")
-},{"bel":4,"message-maker":26,"support-style-sheet":25}],25:[function(require,module,exports){
-module.exports = support_style_sheet
-function support_style_sheet (root, style) {
-    return (() => {
-        try {
-            const sheet = new CSSStyleSheet()
-            sheet.replaceSync(style)
-            root.adoptedStyleSheets = [sheet]
-            return true 
-        } catch (error) { 
-            const inject_style = `<style>${style}</style>`
-            root.innerHTML = `${inject_style}`
-            return false
-        }
-    })()
-}
-},{}],26:[function(require,module,exports){
-module.exports = function message_maker (from) {
-  let msg_id = 0
-  return function make ({to, type, data = null, refs = {} }) {
-      const stack = (new Error().stack.split('\n').slice(2).filter(x => x.trim()))
-      return { head: [from, to, msg_id++], refs, type, data, meta: { stack }}
-  }
-}
-},{}],27:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -1206,7 +923,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],28:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -1503,7 +1220,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":27}],29:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":24}],26:[function(require,module,exports){
 var inserted = {};
 
 module.exports = function (css, options) {
@@ -1527,52 +1244,25 @@ module.exports = function (css, options) {
     }
 };
 
-},{}],30:[function(require,module,exports){
-(function (__filename){(function (){
+},{}],27:[function(require,module,exports){
 const bel = require('bel')
 const csjs = require('csjs-inject')
-const message_maker = require('message-maker')
 
 var id = 0
 
 module.exports = title 
 
-function title(opts, parent_protocol) {
-    console.log({opts, parent_protocol})
-// ---------------------------------------------------------------
-    const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    const {notify, address} = parent_protocol(myaddress, listen)
-    names[address] = recipients['parent'] = { name: 'parent', notify, address, make: message_maker(myaddress) }
-
-    notify(recipients['parent'].make({ to: address, type: 'ready', refs: {} }))
-
-    function listen (msg) {
-        console.log('New message', { msg })
-    }
-// ---------------------------------------------------------------
+function title(opts) {
     const {content, theme} = opts
-
-    function ui_element(css) {
-        const widget = 'ui-title'
-        const element = bel`<h2 class=${css.title} onclick=${e => handle_onclick(e)}>${content}</h2>`
-        return element
-    }
 
     function handle_onclick (e) {
         const { make } = recipients['parent']
         notify(make({ to: address, type: 'click', data: { event: e, target: 'title el' }}))
     }
     
-    if (theme)
-        var {fontFamily, fontSize, fontWeight, lineHeight, color, padding } = theme
+    if (theme) var {fontFamily, fontSize, fontWeight, lineHeight, color, padding } = theme
 
-    const style = csjs`
+    const css = csjs`
     .title {
         font-family: ${fontFamily ? fontFamily : 'Arial, Helvetica, sans-serif'};
         font-size: ${fontSize ? fontSize : '2.2rem'};
@@ -1586,9 +1276,9 @@ function title(opts, parent_protocol) {
     }
     `
 
-    return ui_element(style)
+    const element = bel`<h2 class=${css.title} onclick=${e => handle_onclick(e)}>${content}</h2>`
+    return element
 }
 
 
-}).call(this)}).call(this,"/src/index.js")
-},{"bel":4,"csjs-inject":7,"message-maker":26}]},{},[1]);
+},{"bel":4,"csjs-inject":7}]},{},[1]);

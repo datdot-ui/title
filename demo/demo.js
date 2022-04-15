@@ -1,75 +1,39 @@
 const bel = require('bel')
 const csjs = require('csjs-inject')
 const title = require('..')
-const main_title = require('./title.json')
-const message_maker = require('message-maker')
-const logs = require('datdot-ui-logs')
+const main_title = require('./main_title.json')
 
 var id = 0
 
 function demo() {
-// ---------------------------------------------------------------
-const myaddress = `${__filename}-${id++}`
-    const inbox = {}
-    const outbox = {}
-    const recipients = {}
-    const names = {}
-    const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
-
-    function make_protocol (name) {
-        return function protocol (address, notify) {
-            names[address] = recipients[name] = { name, address, notify, make: message_maker(myaddress) }
-            return { notify: listen, address: myaddress }
-        }
-    }
-    function listen (msg) {
-        console.log('New message', { msg })
-        const { head, refs, type, data, meta } = msg // receive msg
-        inbox[head.join('/')] = msg                  // store msg
-        const [from] = head
-        const { make: logs_make, address: logs_address, notify: logs_notify } = recipients['logs']
-        logs_notify(logs_make({ to: logs_address, type, data }))
-        // send back ack
-        const { notify, make, address } = names[from]
-        notify(make({ to: address, type: 'ack', refs: { 'cause': head } }))
-    }
-// ---------------------------------------------------------------
-    const log_list = logs(make_protocol('logs'))
-    const defaultTitle = title({
-        page: 'demo',
-        name: 'title',
+    const title_main = title({
         content: 'Demo title',
         theme: {
             ...main_title,
         }
-    }, make_protocol('title-demo'))
-    const title1 = title({
-        page: 'demo',
-        name: 'title',
+    })
+    const subtitle_1 = title({
         content: 'Create new account',
         theme: {
             ...main_title,
             color: 'var(--color-violet-color-wheel)'
         }
-    }, make_protocol('title-1'))
+    })
 
-    const title2= title({
-        page: 'demo',
-        name: 'title',
+    const subtitle_2= title({
         content: 'Import account',
         theme: {
             ...main_title,
             color: 'var(--color-sring-green)',
             padding: '20px 0'
         }
-    }, make_protocol('title-2'))
+    })
 
     const el = bel`
         <div class=${css.wrap}>
             <section class=${css.container}>
-                <div class=${css.content}> ${defaultTitle} ${title1} ${title2} </div>
+                <div class=${css.content}> ${title_main} ${subtitle_1} ${subtitle_2} </div>
             </section>
-            ${log_list}
         </div>`
     
     console.log({el})
