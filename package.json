@@ -1,6 +1,6 @@
 {
   "name": "datdot-ui-title",
-  "version": "0.0.1-alpha",
+  "version": "0.0.2-alpha",
   "description": "code snippet",
   "main": "src/index.js",
   "scripts": {
@@ -25,12 +25,11 @@
   "homepage": "https://github.com/datdot-ui/title#readme",
   "devDependencies": {
     "browserify": "^17.0.0",
-    "budo": "^11.6.4"
+    "budo": "^11.7.0"
   },
   "dependencies": {
     "bel": "^6.0.0",
     "csjs-inject": "^1.0.1",
-    "message-maker": "github:datdotorg/message-maker",
-    "datdot-ui-logs": "git+https://github.com/datdot-ui/logs.git#v0.0.1-alpha"
+    "message-maker": "github:datdotorg/message-maker"
   }
 }
