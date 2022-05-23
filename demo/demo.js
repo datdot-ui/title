@@ -2,23 +2,32 @@ const bel = require('bel')
 const csjs = require('csjs-inject')
 const title = require('..')
 const main_title = require('./main_title.json')
+const protocol_maker = require('protocol-maker')
 
 var id = 0
 
 function demo() {
+
+    const contacts = protocol_maker('demo', listen)
+    function listen (msg) {
+        const { head, refs, type, data, meta } = msg // receive msg
+        const [from, to, msg_id] = head
+        console.log({msg})
+    }
+
     const title_main = title({
         content: 'Demo title',
         theme: {
             ...main_title,
         }
-    })
+    }, contacts.add('main-title'))
     const subtitle_1 = title({
         content: 'Create new account',
         theme: {
             ...main_title,
             color: 'var(--color-violet-color-wheel)'
         }
-    })
+    }, contacts.add('subtitle-1'))
 
     const subtitle_2= title({
         content: 'Import account',
@@ -27,7 +36,7 @@ function demo() {
             color: 'var(--color-sring-green)',
             padding: '20px 0'
         }
-    })
+    }, contacts.add('subtitle-2'))
 
     const el = bel`
         <div class=${css.wrap}>

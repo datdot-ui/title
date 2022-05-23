@@ -3,23 +3,32 @@ const bel = require('bel')
 const csjs = require('csjs-inject')
 const title = require('..')
 const main_title = require('./main_title.json')
+const protocol_maker = require('protocol-maker')
 
 var id = 0
 
 function demo() {
+
+    const contacts = protocol_maker('demo', listen)
+    function listen (msg) {
+        const { head, refs, type, data, meta } = msg // receive msg
+        const [from, to, msg_id] = head
+        console.log({msg})
+    }
+
     const title_main = title({
         content: 'Demo title',
         theme: {
             ...main_title,
         }
-    })
+    }, contacts.add('main-title'))
     const subtitle_1 = title({
         content: 'Create new account',
         theme: {
             ...main_title,
             color: 'var(--color-violet-color-wheel)'
         }
-    })
+    }, contacts.add('subtitle-1'))
 
     const subtitle_2= title({
         content: 'Import account',
@@ -28,7 +37,7 @@ function demo() {
             color: 'var(--color-sring-green)',
             padding: '20px 0'
         }
-    })
+    }, contacts.add('subtitle-2'))
 
     const el = bel`
         <div class=${css.wrap}>
@@ -166,7 +175,7 @@ body {
 `
 
 document.body.append(demo())
-},{"..":27,"./main_title.json":2,"bel":4,"csjs-inject":7}],2:[function(require,module,exports){
+},{"..":29,"./main_title.json":2,"bel":4,"csjs-inject":7,"protocol-maker":25}],2:[function(require,module,exports){
 module.exports={
     "fontSize": "2.2rem",
     "fontWeight": "var(--font-bold)",
@@ -406,7 +415,7 @@ module.exports = hyperx(belCreateElement, {comments: true})
 module.exports.default = module.exports
 module.exports.createElement = belCreateElement
 
-},{"./appendChild":3,"hyperx":25}],5:[function(require,module,exports){
+},{"./appendChild":3,"hyperx":27}],5:[function(require,module,exports){
 (function (global){(function (){
 'use strict';
 
@@ -425,7 +434,7 @@ function csjsInserter() {
 module.exports = csjsInserter;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"csjs":10,"insert-css":26}],6:[function(require,module,exports){
+},{"csjs":10,"insert-css":28}],6:[function(require,module,exports){
 'use strict';
 
 module.exports = require('csjs/get-css');
@@ -903,6 +912,147 @@ function scopify(css, ignores) {
 }
 
 },{"./regex":20,"./replace-animations":21,"./scoped-name":22}],24:[function(require,module,exports){
+module.exports = function message_maker (from) {
+  let msg_id = 0
+  return function make ({to, type, data = null, refs = {} }) {
+      const stack = (new Error().stack.split('\n').slice(2).filter(x => x.trim()))
+      return { head: [from, to, msg_id++], refs, type, data, meta: { stack }}
+  }
+}
+},{}],25:[function(require,module,exports){
+// const path = require('path')
+// const filename = path.basename(__filename)
+const message_maker = require('message-maker')
+// const message_id = to => (outbox[to] = 1 + (outbox[to]||0))
+
+module.exports = protocol_maker
+
+const routes = {}
+var id = 0
+
+function protocol_maker (type, listen, initial_contacts = {}) {
+  if (!type || typeof type !== 'string') throw new Error('invalid type')
+  const myaddress = id++
+
+  const inbox = {}
+  const outbox = {}
+
+  const by_name = {}
+  const by_address = {}
+  const contacts = { add, by_name, by_address, cut, on }
+  
+  const keys = Object.keys(initial_contacts)
+  for (var i = 0, len = keys.length; i < len; i++) {
+    const name = keys[i]
+    const wire = initial_contacts[name]
+    // @INFO: perspective of sub instance:
+    const { notify, address } = wire(myaddress, wrap_listen(listen))    
+    const contact = {
+      name,
+      address,
+      // path: `${myaddress}/${name}`,
+      notify: wrap_notify(notify),
+      make: message_maker(myaddress)
+    }
+    by_name[name] = by_address[address] = contact // new Promise(resolve => resolve(contact))
+  }
+  return contacts
+  function on (listener) {
+    // @NOTE: to listen to any "default protocol events" supported by any protocol, e.g. help
+    // maybe also: 'connect', or 'disconnect'
+    throw new Error ('`on` is not yet implemented')
+    return function off () {}
+  }
+  function cut (wire) { throw new Error ('`cut` is not yet implemented')}
+  function add (name) {
+    // @INFO: perspective of instance:
+    if (!name || typeof name !== 'string') throw new Error('invalid name')
+    if (by_name[name]) throw new Error('name already exists')
+    const wait = {}
+    by_name[name] = { name, make: message_maker(myaddress) } // new Promise((resolve, reject) => { wait.resolve = resolve; wait.reject = reject })
+    return function wire (address, notify) {
+      const contact = {
+        // @TODO: add queryable "routes" and allow lookup `by_route[route]`       
+        name, // a nickname dev gives to a component
+        address, // an address app makes for each component
+        // TODO: address will become "name" (like type) compared to nickname
+        // address: something new, based on e.g. filepath or browserified bundle.js:22:42 etc.. to give actual globally unique identifier
+        notify: wrap_notify(notify),
+        make: message_maker(myaddress)
+      }
+      // wait.resolve(contact)
+      by_name[name].address = address
+      by_name[name].notify = wrap_notify(notify)
+      by_address[address] = contact // new Promise(resolve => resolve(contact))
+      return { notify: wrap_listen(listen), address: myaddress }
+    }
+  }
+  function wrap_notify (notify) {
+    return message => {
+      outbox[message.head.join('/')] = message  // store message
+      return notify(message)
+    }
+  }
+  function wrap_listen (listen) {
+    return message => {
+      inbox[message.head.join('/')] = message  // store message
+      return listen(message)
+    }
+  }
+}
+/*
+const name_routes = [
+  "root/",
+  "root/el:demo/",
+  "root/el:demo/cpu:range-slider/",
+  "root/el:demo/cpu:range-slider/%:input-number/",
+  "root/el:demo/ram:range-slider/",
+  "root/el:demo/ram:range-slider/GB:input-number/",
+  "root/el:demo/upload:range-slider/",
+  "root/el:demo/upload:range-slider/MB:input-number/",
+  "root/el:demo/download:range-slider/",
+  "root/el:demo/download:range-slider/MB:input-number/",  
+]
+// --------------------------------------------------
+const name_routes = {
+    root: {
+        "el:demo": {
+            "cpu:range-slider": {
+                "%:input-number": {}
+            },
+            "ram:range-slider": {
+                "GB:input-number": {}
+            },
+            "download:range-slider": {
+                "MB:input-number": {}
+            },
+            "upload:range-slider": {
+                "MB:input-number": {}
+            },
+        },
+    },
+}
+// --------------------------------------------------
+const name_routes = {
+    root: {
+        "el": {
+            "cpu": {
+                "%": {}
+            },
+            "ram": {
+                "GB": {}
+            },
+            "download": {
+                "MB": {}
+            },
+            "upload": {
+                "MB": {}
+            },
+        },
+    },
+}
+*/
+},{"message-maker":24}],26:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -923,7 +1073,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],25:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -1220,7 +1370,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":24}],26:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":26}],28:[function(require,module,exports){
 var inserted = {};
 
 module.exports = function (css, options) {
@@ -1244,20 +1394,27 @@ module.exports = function (css, options) {
     }
 };
 
-},{}],27:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 const bel = require('bel')
 const csjs = require('csjs-inject')
+const protocol_maker = require('protocol-maker')
 
 var id = 0
 
 module.exports = title 
 
-function title(opts) {
+function title(opts, parent_wire) {
+    const initial_contacts = { 'parent': parent_wire }
+    const contacts = protocol_maker('input-number', listen, initial_contacts)
+    function listen () {
+        const { head, refs, type, data, meta } = msg // listen to msg
+        const [from, to, msg_id] = head        
+    }
     const {content, theme} = opts
 
     function handle_onclick (e) {
-        const { make } = recipients['parent']
-        notify(make({ to: address, type: 'click', data: { event: e, target: 'title el' }}))
+        const $parent = contacts.by_name['parent']
+        $parent.notify($parent.make({ to: $parent.address, type: 'click', data: { event: e, target: 'title el' }}))
     }
     
     if (theme) var {fontFamily, fontSize, fontWeight, lineHeight, color, padding } = theme
@@ -1281,4 +1438,4 @@ function title(opts) {
 }
 
 
-},{"bel":4,"csjs-inject":7}]},{},[1]);
+},{"bel":4,"csjs-inject":7,"protocol-maker":25}]},{},[1]);
